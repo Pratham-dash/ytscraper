@@ -47,6 +47,25 @@ implementation that is currently in this folder; the implementation uses
 `faster-whisper`, Qdrant, and optional Gemini/Groq rather than every technology
 listed in that plan.
 
+## Why this differs from `RAGPLAN.md`
+
+`RAGPLAN.md` describes the original design and planned phases. The code in this
+folder has since been adjusted for the current Windows/local-first workflow:
+
+| Area | `RAGPLAN.md` proposed | Current implementation | Why it changed |
+|---|---|---|---|
+| Transcription | `mlx-whisper` on Apple Silicon, with `faster-whisper` as fallback | `faster-whisper` / CTranslate2 | The current workflow targets Windows and CUDA/CPU rather than Apple Silicon |
+| Audio | `ffmpeg` conversion to WAV | `yt-dlp` downloads audio and `faster-whisper` reads it through PyAV | Avoids a separate `ffmpeg` requirement and large intermediate WAV files |
+| Embeddings | `BAAI/bge-m3` locally and Gemini embeddings for deployment | `all-MiniLM-L6-v2` by default, with bge-m3 still configurable | The smaller model makes the bundled/local workflow much faster and lighter |
+| Vector store | ChromaDB | Qdrant embedded locally by default, or Qdrant Cloud | Provides the current local index format and an easy hosted option |
+| LLM | Gemini as the default provider | Gemini or Groq, auto-selected from configured keys | Keeps the answer provider flexible and supports the keys used by this project |
+| Distribution | Build the index after cloning | 126 transcripts and `index/vectors.npz` are already bundled | Users can run the demo without a GPU, transcription, or embedding pass |
+| Delivery | Deployment is a later phase | FastAPI and the web UI are already included | The current folder has progressed beyond the initial CLI-only phases |
+
+The plan remains useful as architectural background, but commands and defaults
+should be taken from this README and `pyproject.toml`, because those describe
+the code that is actually present.
+
 ## Stack
 
 | Area | Current implementation |
